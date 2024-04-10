@@ -41,13 +41,11 @@ def get_current_frames():
     PIR = calculate_PIR(base64_pir_image)
 
     adjustment = adjust_value(PIR)
-    
-    capture_and_save_frame()
 
-    base64_webcam_image = current_wc_img
+    # base64_webcam_image = current_wc_img
     # print(base64_webcam_image)
     
-    brightness = calculate_brightness(current_wc_img)
+    brightness = calculate_brightness(capture_and_save_frame())
 
     return jsonify({'PIR': PIR, 'adjustment': adjustment, 'brightness': brightness})
 
@@ -102,9 +100,10 @@ def capture_and_save_frame():
 
     # Convert the byte stream to a BytesIO object
     image_bytes = io.BytesIO(buffer)
-    current_wc_img = image_bytes.getvalue()
-    print(current_wc_img)
+    base64_encoded_image = base64.b64encode(image_bytes.getvalue()).decode('utf-8')
 
+    return base64_encoded_image
+    
 
 def adjust_value(ratio):
     # The mid_range is considered as the baseline for optimal PIR
@@ -148,6 +147,7 @@ def calculate_brightness(image_data):
 
     nparr = np.frombuffer(base64.b64decode(image_data), np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    print(image)
     
     # Convert image to grayscale
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
